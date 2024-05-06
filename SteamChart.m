@@ -96,28 +96,10 @@ classdef SteamChart < matlab.graphics.chartcontainer.ChartContainer
         function setup(obj)
             % The setup method runs once when an object is constructed
             
-            % Draw saturation lines
-            % Temperature breakpoints
-            T0 = 0;
-            T1 = obj.T_crit;
-            x = 1./(1+exp(-10*linspace(-1,1,101)));
-            T = T0 + (T1-T0).*x;
-            % Evaluate h,s for the saturation lines
-            h_sat_vap = arrayfun(@(y) XSteam('hV_T', y), T);
-            s_sat_vap = arrayfun(@(y) XSteam('sV_T', y), T);
-            h_crit = XSteam('h_pT', obj.p_crit, obj.T_crit);
-            s_crit = XSteam('s_pT', obj.p_crit, obj.T_crit);
-            h_sat_liq = arrayfun(@(y) XSteam('hL_T', y), T);
-            s_sat_liq = arrayfun(@(y) XSteam('sL_T', y), T);
-            
             % Get the axes
             ax = getAxes(obj);
             hold(ax,'on')
-            
-            % Plot saturation lines and crit point
-            plot(ax, [s_sat_liq s_sat_vap(end:-1:1)] , [h_sat_liq h_sat_vap(end:-1:1)], 'k', 'LineWidth', 1);
-            plot(ax, s_crit, h_crit, '.k', 'MarkerSize', 10)
-            
+
             % Set axis labels
             xlabel(ax, 'Specific Entropy, s (kJ/kg)')
             ylabel(ax, 'Specific Enthalpy, h (kJ/kg)')
