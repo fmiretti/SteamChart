@@ -520,20 +520,21 @@ classdef SteamChart < matlab.graphics.chartcontainer.ChartContainer
             
         end
         
-        function varargout = xlim(obj, varargin)
-            if length(varargin) == 1
-                obj.sLim = varargin{1};
-            elseif isempty(varargin)
-                varargout{1} = obj.sLim;
-            end
+        function set.sLim(obj, lim)
+            ax = getAxes(obj);
+            xlim(ax, lim);
         end
-        
-        function varargout = ylim(obj, varargin)
-            if length(varargin) == 1
-                obj.hLim = varargin{1};
-            elseif isempty(varargin)
-                varargout{1} = obj.hLim;
-            end
+        function lim = get.sLim(obj)
+            ax = getAxes(obj);
+            lim = ax.XLim;
+        end
+        function set.hLim(obj, lim)
+            ax = getAxes(obj);
+            ylim(ax, lim);
+        end
+        function lim = get.hLim(obj)
+            ax = getAxes(obj);
+            lim = ax.YLim;
         end
         
         function title(obj,txt)
