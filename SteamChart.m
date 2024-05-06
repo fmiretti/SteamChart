@@ -132,6 +132,24 @@ classdef SteamChart < matlab.graphics.chartcontainer.ChartContainer
             % Major grid settings
             ax.GridAlpha = 1;
             ax.GridColor = [0.8 0.8 0.8];
+
+            % Draw saturation lines
+            % Temperature breakpoints
+            T0 = 0;
+            T1 = obj.T_crit;
+            x = 1./(1+exp(-10*linspace(-1,1,101)));
+            T = T0 + (T1-T0).*x;
+            % Evaluate h,s for the saturation lines
+            h_sat_vap = arrayfun(@(y) XSteam('hV_T', y), T);
+            s_sat_vap = arrayfun(@(y) XSteam('sV_T', y), T);
+            h_crit = XSteam('h_pT', obj.p_crit, obj.T_crit);
+            s_crit = XSteam('s_pT', obj.p_crit, obj.T_crit);
+            h_sat_liq = arrayfun(@(y) XSteam('hL_T', y), T);
+            s_sat_liq = arrayfun(@(y) XSteam('sL_T', y), T);
+                        
+            % Plot saturation lines and crit point
+            plot(ax, [s_sat_liq s_sat_vap(end:-1:1)] , [h_sat_liq h_sat_vap(end:-1:1)], 'k', 'LineWidth', 1);
+            plot(ax, s_crit, h_crit, '.k', 'MarkerSize', 10)
             
             hold(ax,'off')
         end
@@ -155,12 +173,16 @@ classdef SteamChart < matlab.graphics.chartcontainer.ChartContainer
             % Update title
             title(getAxes(obj), obj.TitleText);
             
-            % Redraw
+            % Redraw isolines
             obj.draw_isobarics(obj.isobarics);
             obj.draw_isothermals(obj.isothermals);
             obj.draw_isochorics(obj.isochorics);
             obj.draw_isoquality(obj.isoquality);
 
+            % Redraw labels
+            obj.draw_pressure_labels;
+
+            % Redraw markers
             obj.draw_markers();
             
             hold(ax,'off')
@@ -173,18 +195,10 @@ classdef SteamChart < matlab.graphics.chartcontainer.ChartContainer
             % Wipe current isobarics
             for n = 1:length(obj.isobaric_lines)
                 delete(obj.isobaric_lines{n});
-                delete(obj.isobaric_labels{n});
             end
             
             % get axes object
             ax = getAxes(obj);
-            % Curve for labels placement
-            ecc = 2;
-            x_lim = obj.sLim;
-            y_lim = obj.hLim;
-            Rx = ecc/(x_lim(2) - x_lim(1));
-            Ry = ecc/(y_lim(2) - y_lim(1));
-            hyperbole = @(x) (1./((x - x_lim(2)).*Rx.*Ry) + y_lim(2)) .* (x < x_lim(2));
             
             % Draw lines
             s = 0:.1:10;
@@ -192,11 +206,6 @@ classdef SteamChart < matlab.graphics.chartcontainer.ChartContainer
                 h = arrayfun(@(y) XSteam('h_ps', p(k), y), s);
                 % Draw line
                 obj.isobaric_lines{k} = plot(ax, s, h, 'Color', [0 0 1]);
-                % Labels
-                [s_label, h_label, orient] = obj.labels_placement(hyperbole, s, h);
-                obj.isobaric_labels{k} = text(ax, s_label, h_label, ...
-                    ['p = ' num2str(p(k)) ' bar'], 'Color', [0 0 1], ...
-                    'Rotation', orient,  'BackgroundColor', 'w', 'Margin', 1);
             end
         end
         
@@ -327,6 +336,33 @@ classdef SteamChart < matlab.graphics.chartcontainer.ChartContainer
                     'Rotation', orient, 'BackgroundColor', 'w', 'Margin', 1);
             end
 
+        end
+
+        function draw_pressure_labels(obj)
+
+            % Wipe current labels
+            for n = 1:length(obj.isobaric_labels)
+                delete(obj.isobaric_labels{n});
+            end
+
+            % get axes object
+            ax = getAxes(obj);
+
+            % Curve for labels placement
+            ecc = 2;
+            x_lim = obj.sLim;
+            y_lim = obj.hLim;
+            Rx = ecc/(x_lim(2) - x_lim(1));
+            Ry = ecc/(y_lim(2) - y_lim(1));
+            hyperbole = @(x) (1./((x - x_lim(2)).*Rx.*Ry) + y_lim(2)) .* (x < x_lim(2));
+
+            % Place labels
+            for k = 1:length(obj.isobaric_lines)
+                [s_label, h_label, orient] = obj.labels_placement(hyperbole, obj.isobaric_lines{k}.XData, obj.isobaric_lines{k}.YData);
+                obj.isobaric_labels{k} = text(ax, s_label, h_label, ...
+                    ['p = ' num2str(obj.isobarics(k)) ' bar'], 'Color', [0 0 1], ...
+                    'Rotation', orient,  'BackgroundColor', 'w', 'Margin', 1);
+            end
         end
 
         function draw_markers(obj)
