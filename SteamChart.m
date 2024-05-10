@@ -100,6 +100,9 @@ classdef SteamChart < matlab.graphics.chartcontainer.ChartContainer
             ax = getAxes(obj);
             hold(ax,'on')
 
+            % Disable pan
+            ax.Interactions = [zoomInteraction];
+
             % Set axis labels
             xlabel(ax, 'Specific Entropy, s (kJ/kg)')
             ylabel(ax, 'Specific Enthalpy, h (kJ/kg)')
@@ -135,7 +138,7 @@ classdef SteamChart < matlab.graphics.chartcontainer.ChartContainer
             
             hold(ax,'off')
         end
-        
+
         function update(obj)
             % The update method runs any time the properties are modified
             
@@ -515,6 +518,14 @@ classdef SteamChart < matlab.graphics.chartcontainer.ChartContainer
             
             fig_export.PaperUnits = 'normalized';
             fig_export.PaperPosition = [-0.05 -0.07 1.1 1.14];
+
+            % Add stamp
+            dim = [0.7 0.08 1 1];
+            str = "github.com/fmiretti/SteamChart";
+            annotation(fig_export, 'textbox', dim, 'String', str, ...
+                'VerticalAlignment', 'bottom', 'Margin', 0, ...
+                'LineStyle', 'none', 'FontSize', 8, ...
+                'FontName', 'Courier New');
             
             saveas(fig_export, filename)
             
