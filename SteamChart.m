@@ -12,7 +12,7 @@ classdef SteamChart < matlab.graphics.chartcontainer.ChartContainer
     %   Name-Value Properties
     %   -------
     %   'sLim':     1x2 numeric
-    %       The entrophy axis limits
+    %       The entropy axis limits
     %   'hLim':     1x2 numeric
     %       The enthalpy axis limits
     %   'sMajorGridStep', 'hMajorGridStep':     scalar
@@ -104,8 +104,8 @@ classdef SteamChart < matlab.graphics.chartcontainer.ChartContainer
             ax.Interactions = [zoomInteraction];
 
             % Set axis labels
-            xlabel(ax, 'Specific Entropy, s (kJ/kg)')
-            ylabel(ax, 'Specific Enthalpy, h (kJ/kg)')
+            xlabel(ax, 'Specific entropy s, kJ/(kgK)')
+            ylabel(ax, 'Specific enthalpy h, kJ/kg')
             
             % Show grid
             grid(ax, 'on')
